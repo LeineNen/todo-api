@@ -5,16 +5,17 @@ import { Router } from "express";
 const userRouter = Router()
 
 // import the routes from the controller
-import { register, logIn, logOut } from "../controllers/user.controller.js";
-
+import { registerUser, loginUser, logoutUser, updateProfile } from "../controllers/user.controller.js";
+import { userAvatarUpload } from "../middlewares/upload.js";
 
 // create the routes
-userRouter.post('/users/register', register),
+userRouter.post('/users/register', registerUser),
 
-userRouter.post('/users/logIn', logIn),
+userRouter.post('/users/logIn', loginUser),
 
-userRouter.post('/users/logOut', logOut)
+userRouter.post('/users/logOut', logoutUser)
 
+userRouter.post('/users/me', userAvatarUpload.single('userAvatar'), updateProfile);
 
 // Export router
 export default userRouter;

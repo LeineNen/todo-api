@@ -1,35 +1,58 @@
 
+import {  request } from "express";
 import { TodoModel } from "../models/todo.models.js";
+import { addTodovalidator, updateTodovalidator } from "../validators/todo.validator.js";
+
+
+// Validate user input
+// Write todo to database
+
+//  const newTodo = await TodoModel.create(req.body);
 
 export const addTodo = async (req, res, next) => {
-   try {
-     // Validate user input
-     // Write todo to database
-     console.log(req.body);
-     await TodoModel.create(req.body);
-     // Respond to request
-     res.status(201).json('Todo was added');
-   } catch (error) {next(error);
-    
-   }
-}
+  try {
+    console.log(req.file)
+    const { error, value } = addTodovalidator.validate({
+      ...req.body,
+      icon: req.file?.filename
+    });
+    if (error) {
+      return res.status(422).json(error);
+    }
+    await TodoModel.create(
+      value
+    )
+
+    // Respond to request
+    res.status(201).json("You have posted to todo");
+  } catch (error) {
+    next(error);
+
+  }
+};
 
 export const getTodos = async (req, res, next) => {
-   try {
+  try {
+    const { filter = "{}", limit = 10, skip = 0 } = req.query;
+    console.log(req.query)
     // fetch todos from database
-    const todos = await TodoModel.find();
+    const todos = await TodoModel
+      .find(JSON.parse(filter))
+      .limit(limit)
+      .skip(skip);
     // return response
-     res.status(200).json(todos);
-   } catch (error) {next(error);
-    
-   }
-}
+    res.status(200).json(todos);
+  } catch (error) {
+    next(error);
 
-export const updateTodo = ( req, res, next) => {
-    res.json('Todo updated');
-}
+  }
+};
 
-export const deleteTodo = ( req, res, next) => {
-    res.json('Todo deleted');
+export const updateTodo = (req, res, next) => {
+  res.json('Todo updated');
+};
+
+export const deleteTodo = (req, res, next) => {
+  res.json('Todo deleted');
 }
 
