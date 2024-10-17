@@ -1,5 +1,5 @@
 
-import { registerUserValidator, loginUserValidator } from "../validators/user.validator.js";
+import { registerUserValidator, loginUserValidator, updateProfileValidator } from "../validators/user.validator.js";
 import { UserModel } from "../models/user.models.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -55,7 +55,7 @@ export const loginUser = async (req, res, next) => {
         const token = jwt.sign(
             { id: user.id },
             process.env.JWT_PRIVATE_KEY,
-            {expiresIn: '24h'}
+            { expiresIn: '24h' }
         )
         // Respond to request
         res.json({
@@ -67,8 +67,19 @@ export const loginUser = async (req, res, next) => {
     }
 }
 
-export const getProfile = (req, res, next) => {
-    res.json('User profile')
+export const getProfile = async (req, res, next) => {
+    try {
+        console.log(req.auth);
+        // Find authenticated user from database
+        const user = await UserModel
+            .findById(req.auth.id)
+            .select({ password: false });
+        // Respond to request
+        res.json(user)
+    } catch (error) {
+        next(error)
+
+    }
 }
 
 
@@ -82,6 +93,8 @@ export const logoutUser = (req, res, next) => {
 
 export const updateProfile = (req, res, next) => {
     try {
+        // Validate user input
+        const { } = updateProfileValidator.validate(req.body);
         res.json('user profile updated')
     } catch (error) {
         next(error)
